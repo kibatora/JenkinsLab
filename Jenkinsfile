@@ -1,5 +1,9 @@
 pipeline {
     agent any
+    docker {
+            image 'docker:latest'
+            reuseNode true
+        }
     stages {
         stage('Build') {
             steps {
