@@ -3,7 +3,7 @@ pipeline {
     stages {
         stage('Build') {
             steps {
-                sh 'docker build -t my-app /app' # Указываем полный путь к Dockerfile
+                sh 'docker build -t my-app /app'
             }
         }
         stage('Deploy') {
