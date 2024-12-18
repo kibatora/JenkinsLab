@@ -1,0 +1,13 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<fingerprint>
+  <timestamp>2024-12-18 15:48:02.60 UTC</timestamp>
+  <md5sum>8a5511abfcd39d8ea1a80c350b2d8ea9</md5sum>
+  <fileName>Credential id=jenkins-ssh-key name=Kiba</fileName>
+  <usages>
+    <entry>
+      <string>CD-Pipeline</string>
+      <ranges>1-2</ranges>
+    </entry>
+  </usages>
+  <facets/>
+</fingerprint>

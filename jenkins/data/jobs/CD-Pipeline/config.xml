@@ -1,0 +1,70 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<flow-definition plugin="workflow-job@1472.ve4d5eca_143c4">
+  <actions>
+    <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobAction plugin="pipeline-model-definition@2.2218.v56d0cda_37c72"/>
+    <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction plugin="pipeline-model-definition@2.2218.v56d0cda_37c72">
+      <jobProperties/>
+      <triggers/>
+      <parameters/>
+      <options/>
+    </org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction>
+  </actions>
+  <description></description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>
+      <triggers>
+        <hudson.triggers.TimerTrigger>
+          <spec>H/30 * * * *</spec>
+        </hudson.triggers.TimerTrigger>
+      </triggers>
+    </org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>
+  </properties>
+  <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps@4000.v5198556e9cea_">
+    <script>pipeline {
+    agent any
+    stages {
+         stage(&apos;Clone Repository&apos;) {
+             steps {
+                    git branch: &apos;main&apos;, 
+                        url: &apos;git@github.com:kibatora/JenkinsLab.git&apos;,
+                        credentialsId: &apos;jenkins-ssh-key&apos;
+                }
+            }
+         stage(&apos;Build Docker Image&apos;) {
+                steps {
+                    script {
+                       def dockerImage = docker.build(&quot;local/repository:${env.BUILD_NUMBER}&quot;)
+                       }
+                }
+            }
+         stage(&apos;Deploy&apos;) {
+                steps {
+                    script {
+                        def containerExists = sh(script: &quot;docker ps -aq -f name=app-container&quot;, returnStdout: true).trim()
+                            if (containerExists) {
+                               sh &quot;docker stop app-container&quot;
+                               sh &quot;docker rm app-container&quot;
+                            }
+                        def portOccupied = sh(script: &quot;netstat -tuln | grep &apos;:8080&apos;&quot;, returnStatus: true)
+                        if (portOccupied == 0) {
+                            sh &quot;docker run -d --name app-container -p 8080:8080 local/repository:${env.BUILD_NUMBER}&quot;
+                        } else {
+                           sh &quot;docker run -d --name app-container -p 8081:8080 local/repository:${env.BUILD_NUMBER}&quot;
+                           echo &quot;Port 8080 is occupied, running on port 8081 instead.&quot;
+                          }
+                     }
+                }
+            }
+      }
+      post {
+        always {
+            cleanws()
+           }
+       }
+    }</script>
+    <sandbox>true</sandbox>
+  </definition>
+  <triggers/>
+  <disabled>false</disabled>
+</flow-definition>
