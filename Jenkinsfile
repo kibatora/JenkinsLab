@@ -3,6 +3,7 @@ pipeline {
         docker {
             image 'docker:latest'
             reuseNode true
+	    label 'docker-agent'
         }
     }
     stages {
