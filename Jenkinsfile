@@ -1,6 +1,6 @@
 pipeline {
     agent {
-        docker { 
+        docker {
             image 'docker:latest'
             reuseNode true
         }
@@ -8,7 +8,7 @@ pipeline {
     stages {
         stage('Build') {
             steps {
-                sh 'docker build -t my-app .' //  'cd /app' больше не нужен, так как мы внутри контейнера docker
+                sh 'docker build -t my-app .'
             }
         }
         stage('Deploy') {
