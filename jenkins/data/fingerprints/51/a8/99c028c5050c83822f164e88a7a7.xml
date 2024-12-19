@@ -1,0 +1,13 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<fingerprint>
+  <timestamp>2024-12-18 17:26:01.189 UTC</timestamp>
+  <md5sum>51a899c028c5050c83822f164e88a7a7</md5sum>
+  <fileName>Credential id=jenkins-ssh-key name=kibatora/******</fileName>
+  <usages>
+    <entry>
+      <string>CD-Pipeline</string>
+      <ranges>12-17</ranges>
+    </entry>
+  </usages>
+  <facets/>
+</fingerprint>

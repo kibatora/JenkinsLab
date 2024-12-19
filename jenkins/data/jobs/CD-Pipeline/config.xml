@@ -24,45 +24,43 @@
     <script>pipeline {
     agent any
     stages {
-         stage(&apos;Clone Repository&apos;) {
-             steps {
-                    git branch: &apos;main&apos;, 
-                        url: &apos;git@github.com:kibatora/JenkinsLab.git&apos;,
-                        credentialsId: &apos;jenkins-ssh-key&apos;
+        stage(&apos;Clone Repository&apos;) {
+            steps {
+                git branch: &apos;main&apos;, url: &apos;https://github.com/kibatora/JenkinsLab.git&apos;
+            }
+        }
+        stage(&apos;Build Docker Image&apos;) {
+            steps {
+                script {
+                  def dockerImage = docker.build(&quot;local/repository:${env.BUILD_NUMBER}&quot;, &quot;.&quot;)
                 }
             }
-         stage(&apos;Build Docker Image&apos;) {
-                steps {
-                    script {
-                       def dockerImage = docker.build(&quot;local/repository:${env.BUILD_NUMBER}&quot;)
-                       }
+        }
+        stage(&apos;Deploy&apos;) {
+            steps {
+                script {
+                    def containerExists = sh(script: &quot;docker ps -aq -f name=app-container&quot;, returnStdout: true).trim()
+                    if (containerExists) {
+                        sh &quot;docker stop app-container&quot;
+                        sh &quot;docker rm app-container&quot;
+                    }
+                    def portOccupied = sh(script: &quot;netstat -tuln | grep &apos;:8080&apos;&quot;, returnStatus: true)
+                    if (portOccupied == 0) {
+                        sh &quot;docker run -d --name app-container -p 8080:8080 local/repository:${env.BUILD_NUMBER}&quot;
+                    } else {
+                        sh &quot;docker run -d --name app-container -p 8081:8080 local/repository:${env.BUILD_NUMBER}&quot;
+                        echo &quot;Port 8080 is occupied, running on port 8081 instead.&quot;
+                    }
                 }
             }
-         stage(&apos;Deploy&apos;) {
-                steps {
-                    script {
-                        def containerExists = sh(script: &quot;docker ps -aq -f name=app-container&quot;, returnStdout: true).trim()
-                            if (containerExists) {
-                               sh &quot;docker stop app-container&quot;
-                               sh &quot;docker rm app-container&quot;
-                            }
-                        def portOccupied = sh(script: &quot;netstat -tuln | grep &apos;:8080&apos;&quot;, returnStatus: true)
-                        if (portOccupied == 0) {
-                            sh &quot;docker run -d --name app-container -p 8080:8080 local/repository:${env.BUILD_NUMBER}&quot;
-                        } else {
-                           sh &quot;docker run -d --name app-container -p 8081:8080 local/repository:${env.BUILD_NUMBER}&quot;
-                           echo &quot;Port 8080 is occupied, running on port 8081 instead.&quot;
-                          }
-                     }
-                }
-            }
-      }
-      post {
+        }
+    }
+     post {
         always {
-            cleanws()
-           }
-       }
-    }</script>
+            cleanWs()
+        }
+    }
+}</script>
     <sandbox>true</sandbox>
   </definition>
   <triggers/>
